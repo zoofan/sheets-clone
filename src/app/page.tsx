@@ -36,13 +36,17 @@ const Spreadsheet = () => {
     // Check if left and right are cell references
     const cellRegex = /([A-Z])(\d+)/i;
     const leftMatch = left.match(cellRegex);
-    const rightMatch = right.match(cellRegex);
+    const rightMatch = right?.match(cellRegex);
 
     if (leftMatch) {
       left =
         data[
           `${leftMatch[2] - 1}-${leftMatch[1].toUpperCase().charCodeAt(0) - 65}`
         ];
+
+      if (!operator || !rightMatch) {
+        return left;
+      }
     }
     if (rightMatch) {
       right =
