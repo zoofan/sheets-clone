@@ -1,101 +1,125 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, {useState} from "react";
+
+const Spreadsheet = () => {
+  const [rows, setRows] = useState(6);
+  const [cols, setCols] = useState(6);
+  const [data, setData] = useState({});
+
+  const generateHeaders = (count) =>
+    Array.from({length: count}, (_, i) => String.fromCharCode(65 + i));
+
+  const handleInputChange = (row, col, value) => {
+    setData((prevData) => ({
+      ...prevData,
+      [`${row}-${col}`]: value,
+    }));
+  };
+
+  const handleInputComplete = (row, col, value) => {
+    if (value.startsWith("=")) {
+      handleExpression(row, col, value);
+    }
+  };
+
+  const handleExpression = (row, col, equation) => {
+    const expression = equation.slice(1);
+    let [left, operator, right] = expression.split(/([+/*-])/);
+    const cellRegex = /([A-Z])(\d+)/;
+    const leftMatch = left.match(cellRegex);
+    const rightMatch = right.match(cellRegex);
+    if (leftMatch && rightMatch) {
+      left = data[`${leftMatch[2] - 1}-${leftMatch[1].charCodeAt(0) - 65}`];
+      right = data[`${rightMatch[2] - 1}-${rightMatch[1].charCodeAt(0) - 65}`];
+    }
+    let result;
+    if (operator === "+") {
+      result = Number(left) + Number(right);
+    } else if (operator === "-") {
+      result = Number(left) - Number(right);
+    }
+    setData((prevData) => ({
+      ...prevData,
+      [`${row}-${col}`]: result,
+    }));
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="max-w-6xl mx-auto mt-10">
+      {/* Header */}
+      <header className="text-center mb-6">
+        <h1 className="text-3xl font-bold text-orange-700">Zingage Sheets</h1>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+      {/* Controls */}
+      <div className="flex gap-4 justify-center mb-6">
+        <label className="flex items-center space-x-2">
+          <span className="font-medium text-lg">Rows:</span>
+          <input
+            type="number"
+            min="1"
+            value={rows}
+            onChange={(e) => setRows(Number(e.target.value))}
+            className="w-24 p-3 border rounded-md text-lg font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+        </label>
+        <label className="flex items-center space-x-2">
+          <span className="font-medium text-lg">Columns:</span>
+          <input
+            type="number"
+            min="1"
+            value={cols}
+            onChange={(e) => setCols(Number(e.target.value))}
+            className="w-24 p-3 border rounded-md text-lg font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        </label>
+      </div>
+
+      {/* Spreadsheet */}
+      <div className="overflow-x-auto">
+        <table className="table-auto border-collapse w-full">
+          <thead>
+            <tr>
+              <th className="w-16 border border-gray-300 bg-blue-100 text-lg font-bold text-blue-700"></th>
+              {generateHeaders(cols).map((header, index) => (
+                <th
+                  key={index}
+                  className="w-16 border border-gray-300 bg-blue-100 text-lg font-bold text-blue-700 text-center"
+                >
+                  {header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({length: rows}).map((_, rowIndex) => (
+              <tr key={rowIndex}>
+                <td className="w-16 border border-gray-300 bg-gray-100 text-lg font-bold text-gray-700 text-center">
+                  {rowIndex + 1}
+                </td>
+                {Array.from({length: cols}).map((_, colIndex) => (
+                  <td key={colIndex} className="w-16 border border-gray-300">
+                    <input
+                      type="text"
+                      value={data[`${rowIndex}-${colIndex}`] || ""}
+                      onChange={(e) =>
+                        handleInputChange(rowIndex, colIndex, e.target.value)
+                      }
+                      onBlur={(e) =>
+                        handleInputComplete(rowIndex, colIndex, e.target.value)
+                      }
+                      className="w-full p-3 text-base font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-}
+};
+
+export default Spreadsheet;
