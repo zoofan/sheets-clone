@@ -19,30 +19,70 @@ const Spreadsheet = () => {
 
   const handleInputComplete = (row, col, value) => {
     if (value.startsWith("=")) {
-      handleExpression(row, col, value);
+      const result = handleExpression(row, col, value);
+      setData((prevData) => ({
+        ...prevData,
+        [`${row}-${col}`]: result,
+      }));
     }
   };
 
   const handleExpression = (row, col, equation) => {
+    // Remove initial '='
     const expression = equation.slice(1);
+    // Split expression by operator
     let [left, operator, right] = expression.split(/([+/*-])/);
-    const cellRegex = /([A-Z])(\d+)/;
+
+    // Check if left and right are cell references
+    const cellRegex = /([A-Z])(\d+)/i;
     const leftMatch = left.match(cellRegex);
     const rightMatch = right.match(cellRegex);
-    if (leftMatch && rightMatch) {
-      left = data[`${leftMatch[2] - 1}-${leftMatch[1].charCodeAt(0) - 65}`];
-      right = data[`${rightMatch[2] - 1}-${rightMatch[1].charCodeAt(0) - 65}`];
+
+    if (leftMatch) {
+      left =
+        data[
+          `${leftMatch[2] - 1}-${leftMatch[1].toUpperCase().charCodeAt(0) - 65}`
+        ];
     }
+    if (rightMatch) {
+      right =
+        data[
+          `${rightMatch[2] - 1}-${
+            rightMatch[1].toUpperCase().charCodeAt(0) - 65
+          }`
+        ];
+    }
+
+    // Convert left and right to numbers
+    const leftValue = parseFloat(left);
+    const rightValue = parseFloat(right);
+
+    // Check if both leftValue and rightValue are finite numbers
+    if (!Number.isFinite(leftValue) || !Number.isFinite(rightValue)) {
+      return "Error";
+    }
+
+    // Evaluate expression
     let result;
-    if (operator === "+") {
-      result = Number(left) + Number(right);
-    } else if (operator === "-") {
-      result = Number(left) - Number(right);
+    switch (operator) {
+      case "+":
+        result = leftValue + rightValue;
+        break;
+      case "-":
+        result = leftValue - rightValue;
+        break;
+      case "*":
+        result = leftValue * rightValue;
+        break;
+      case "/":
+        result =
+          rightValue !== 0 ? leftValue / rightValue : "Error: Division by zero";
+        break;
+      default:
+        result = "Error";
     }
-    setData((prevData) => ({
-      ...prevData,
-      [`${row}-${col}`]: result,
-    }));
+
+    return Number.isFinite(result) ? result : "Error";
   };
 
   return (
