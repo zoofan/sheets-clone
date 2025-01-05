@@ -3,7 +3,6 @@
 import React, {useState} from "react";
 import {handleExpression} from "./utils"; // Extracted utility function
 
-// Props types for SpreadsheetControls
 interface SpreadsheetControlsProps {
   rows: number;
   cols: number;
@@ -11,7 +10,6 @@ interface SpreadsheetControlsProps {
   setCols: (value: number) => void;
 }
 
-// Props types for SpreadsheetTable
 interface SpreadsheetTableProps {
   rows: number;
   cols: number;
