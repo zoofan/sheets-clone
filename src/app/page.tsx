@@ -3,13 +3,35 @@
 import React, {useState} from "react";
 import {handleExpression} from "./utils"; // Extracted utility function
 
-const SpreadsheetHeader = () => (
+// Props types for SpreadsheetControls
+interface SpreadsheetControlsProps {
+  rows: number;
+  cols: number;
+  setRows: (value: number) => void;
+  setCols: (value: number) => void;
+}
+
+// Props types for SpreadsheetTable
+interface SpreadsheetTableProps {
+  rows: number;
+  cols: number;
+  data: Record<string, string>;
+  handleInputChange: (row: number, col: number, value: string) => void;
+  handleInputComplete: (row: number, col: number, value: string) => void;
+}
+
+const SpreadsheetHeader: React.FC = () => (
   <header className="text-center mb-6">
     <h1 className="text-3xl font-bold text-orange-700">Zingage Sheets</h1>
   </header>
 );
 
-const SpreadsheetControls = ({rows, cols, setRows, setCols}) => (
+const SpreadsheetControls: React.FC<SpreadsheetControlsProps> = ({
+  rows,
+  cols,
+  setRows,
+  setCols,
+}) => (
   <div className="flex gap-4 justify-center mb-6">
     <label className="flex items-center space-x-2">
       <span className="font-medium text-lg">Rows:</span>
@@ -34,14 +56,14 @@ const SpreadsheetControls = ({rows, cols, setRows, setCols}) => (
   </div>
 );
 
-const SpreadsheetTable = ({
+const SpreadsheetTable: React.FC<SpreadsheetTableProps> = ({
   rows,
   cols,
   data,
   handleInputChange,
   handleInputComplete,
 }) => {
-  const generateHeaders = (count) =>
+  const generateHeaders = (count: number): string[] =>
     Array.from({length: count}, (_, i) => String.fromCharCode(65 + i));
 
   return (
@@ -89,19 +111,23 @@ const SpreadsheetTable = ({
   );
 };
 
-const Spreadsheet = () => {
-  const [rows, setRows] = useState(6);
-  const [cols, setCols] = useState(6);
-  const [data, setData] = useState({});
+const Spreadsheet: React.FC = () => {
+  const [rows, setRows] = useState<number>(6);
+  const [cols, setCols] = useState<number>(6);
+  const [data, setData] = useState<Record<string, string>>({});
 
-  const handleInputChange = (row, col, value) => {
+  const handleInputChange = (row: number, col: number, value: string): void => {
     setData((prevData) => ({
       ...prevData,
       [`${row}-${col}`]: value,
     }));
   };
 
-  const handleInputComplete = (row, col, value) => {
+  const handleInputComplete = (
+    row: number,
+    col: number,
+    value: string
+  ): void => {
     if (value.startsWith("=")) {
       const result = handleExpression(data, row, col, value);
       setData((prevData) => ({
